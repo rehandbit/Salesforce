@@ -79,7 +79,7 @@ export default class LeaveTracker extends LightningElement {
         this.PopupModal = true;
         this.recordId = '';
     }
-    //rowActionHandler this enable us to edit modal form ny poping up modal after edit it save new edited form//
+    //rowActionHandler this enable us to edit the form and enabling popup modal while clicking edit button
     rowActionHandler (event) {
         this.PopupModal = true;
         this.recordId = event.detail.row.Id;
@@ -87,7 +87,7 @@ export default class LeaveTracker extends LightningElement {
     succesHandler (event) {
         this.PopupModal = false;
         this.ShowToast('Data Saved Successfully');
-        // this refreshApex refresh the row and also refresh leave request , from this we dont have refresh browser again .c/accordion
+        // this refreshApex refresh the row and also refresh leave request , from this we dont have refresh browser again 
         // when ever there is update it automaically update using "refreshApex"
         refreshApex(this.myLeavesWireResult);
         refreshApex(this.leaveRequestWiredResult);
