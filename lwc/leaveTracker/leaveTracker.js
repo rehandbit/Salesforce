@@ -1,14 +1,15 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import getMyLeave from '@salesforce/apex/LeaveControllerHandlers.getMyLeave';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import Id from '@salesforce/user/Id';
 import { refreshApex } from '@salesforce/apex';
-
-import LeaveRequest from '@salesforce/apex/LeaveControllerHandlers.getLeaveRequests';
+import getLeaveRequest from '@salesforce/apex/LeaveControllerHandlers.getLeaveRequests';
 
 
 const COLUMNS = [
     {label: 'Request Id' , fieldName:'Name' },
+    {label: 'User' , fieldName:'userName' },
+
     {label: 'From Date' , fieldName:'From_Date__c'},
     {label: 'To Date' , fieldName:'To_Date__c'},
     {label: 'Reason' , fieldName:'Reason__c'},
@@ -29,18 +30,21 @@ export default class LeaveTracker extends LightningElement {
     myLeaves=[];
     myLeavesWireResult;
     
+    leaveRequestWiredResult;
+    leaveRequest=[];
     PopupModal = false;
     
     recordId = '';
 
     currentUserId = Id;
-
+// wire for my leave section
     @wire(getMyLeave)
     wiredMyLeaves(result) {
         this.myLeavesWireResult = result;
         if(result.data) {
             this.myLeaves = result.data.map(a => ({
                 ...a,
+                userName: a.User__r.Name,
                 cellClass: a.Status__c == 'Approved' ? 'slds-theme_inverse' : a.Status__c == 'Rejected' ? 'slds-theme_warning' : '' ,
                 isEditDisabled: a.Status__c != 'Pending'
                 }));
@@ -49,6 +53,25 @@ export default class LeaveTracker extends LightningElement {
             console.log('Error occured while fetching my Leaves-', result.error);
         }
     }
+
+    // wire for get leave request
+
+    @wire(getLeaveRequest)
+    wiredMyLeavess(resultz) {
+        this.leaveRequestWiredResult = resultz;
+        if(resultz.data) {
+            this.leaveRequest = resultz.data.map(a => ({
+                ...a,
+                userName: a.User__r.Name,
+                cellClass: a.Status__c == 'Approved' ? 'slds-theme_success' : a.Status__c == 'Rejected' ? 'slds-theme_warning' : '',
+                isEditDisabled: a.Status__c != 'Pending'
+            }));
+        }
+        if(resultz.error) {
+            console.log('Error occured while fetching leave request', resultz.error)
+        }
+    }
+
     closePopupModal () {
         this.PopupModal = false;
     }
@@ -64,11 +87,12 @@ export default class LeaveTracker extends LightningElement {
     succesHandler (event) {
         this.PopupModal = false;
         this.ShowToast('Data Saved Successfully');
+        // this refreshApex refresh the row and also refresh leave request , from this we dont have refresh browser again .c/accordion
+        // when ever there is update it automaically update using "refreshApex"
         refreshApex(this.myLeavesWireResult);
-
-        const refreshEvent = new CustomEvent('refreshleaverequest');
-        this.dispatchEvent(refreshEvent);
+        refreshApex(this.leaveRequestWiredResult);
     }
+
     ShowToast(message, title = 'success', variant = 'success') {
         const event = new ShowToastEvent({
             title,
@@ -93,23 +117,4 @@ export default class LeaveTracker extends LightningElement {
     get noRecordFound(){
         return this.myLeaves.length==0;
     }
-
-
-
-    // Leave Request
-
-    // @wire(LeaveRequest)
-    // wiredMyLeaves(result) {
-    //     this.LeaveRequestWiredResult = result;
-    //     if(result.data) {
-    //         this.LeaveRequest = result.data.map(ab => ({
-    //             ...ab,
-    //             cellClass: ab.Status__c == 'Approved' ? 'slds-theme_inverse' : ab.Status__c == 'Rejected' ? 'slds-theme_warning' : '' ,
-    //             isEditDisabled: ab.Status__c != 'Pending'
-    //             }));
-    //     }
-    //     if(result.error) {
-    //         console.log('Error occured while fetching my Leaves-', result.error);
-    //     }
-    // }
 }
