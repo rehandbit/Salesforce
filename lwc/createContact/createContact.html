@@ -1,0 +1,18 @@
+<template>
+    <lightning-card title="Add Contact" icon-name="standard:record">
+      <div class="slds-var-m-around_medium">
+          <lightning-input label="First Name" class="slds-var-m-bottom_small" onchange={handleFirstNameChange}>
+
+          </lightning-input>
+          <lightning-input label="Last Name" class="slds-var-m-bottom_small" onchange={handleLastNameChange}>
+
+          </lightning-input>
+          <lightning-input label="Email" class="slds-var-m-bottom_small" type="email" pattern=".+@example.com" onchange={handleEmailChange}>
+
+          </lightning-input>
+
+          <lightning-button label="Create Contact" onclick={CreateContact} variant="brand" > </lightning-button>
+      </div>
+      
+    </lightning-card>
+</template>
